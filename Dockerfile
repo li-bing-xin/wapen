@@ -13,7 +13,7 @@ RUN yarn build-only
 
 # 使用“http-server”模块启动Node.js服务器。
 RUN yarn global add http-server
-CMD ["http-server", "dist", "--proxy", "http://localhost:8080?"]
+CMD ["http-server", "dist", "--proxy", "http://localhost:7777?"]
 
 # 开放容器所使用的端口号。
-EXPOSE 8080
+EXPOSE 7777
