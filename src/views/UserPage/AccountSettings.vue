@@ -74,6 +74,7 @@
           variant="outlined"
           hide-details
           :items="writingFor"
+          placeholder="Select"
         ></v-select>
       </div>
     </div>
@@ -91,6 +92,7 @@
           variant="outlined"
           hide-details
           :items="jobs"
+          placeholder="Select"
         ></v-select>
       </div>
     </div>
@@ -184,6 +186,7 @@ h2 {
 
 .about-user {
   font-size: 14px;
+  max-width: 800px;
 }
 
 .v-btn {

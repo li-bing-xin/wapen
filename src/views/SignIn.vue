@@ -1,5 +1,5 @@
 <template>
-  <main class="flex-center page pa-2 pt-16">
+  <main class="flex-center page">
     <v-card title="Sign in" :width="500">
       <div class="pt-4 px-7 pb-8">
         <v-form>
@@ -41,19 +41,19 @@
           </v-btn>
         </v-form>
 
-        <div class="other-way">
+        <!-- <div class="other-way">
           <div class="way mt-4" @click="onGoogleSignIn">
             <img src="@/assets/google.svg" alt="Google" />
             <span>Sign in with Google</span>
             <v-icon icon="mdi-chevron-right"> </v-icon>
           </div>
-        </div>
+        </div> -->
       </div>
     </v-card>
   </main>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { googleAuthCodeLogin, decodeCredential } from "vue3-google-login";
 
 import { reactive } from "vue";
@@ -61,15 +61,18 @@ import { reactive } from "vue";
 import { useRouter } from "vue-router";
 import { useAsyncState } from "@vueuse/core";
 import { signInReq } from "@/api/user";
+import { useUser } from "@/stores/user";
 
 const router = useRouter();
+const { setUsername } = useUser();
 
 const { isLoading, execute: signIn } = useAsyncState(
   () => signInReq(form),
   null,
   {
     immediate: false,
-    onSuccess() {
+    onSuccess(res) {
+      if (res?.data.username) setUsername(res.data.username);
       router.push("/ai-writer");
     },
   }
@@ -79,9 +82,6 @@ const form = reactive({
   email: "",
   password: "",
 });
-const onContinue = () => {
-  console.log(form);
-};
 
 const onGoogleSignIn = () => {
   const GOOGLE_CLIENT_ID =
@@ -92,8 +92,8 @@ const onGoogleSignIn = () => {
   })
     .then((response) => {
       console.log("Handle the response", response);
-      const userData = decodeCredential(response.credential);
-      console.log("Handle the userData", userData);
+      // const userData = decodeCredential(response.credential);
+      // console.log("Handle the userData", userData);
     })
     .catch((err) => {
       console.log(err, 1);
@@ -109,6 +109,8 @@ const onGotoSignUp = () => {
 main {
   display: flex;
   justify-content: center;
+  flex: 1;
+  min-height: 600px;
 }
 
 .way {

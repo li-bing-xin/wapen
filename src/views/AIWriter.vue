@@ -1,348 +1,301 @@
 <template>
-  <v-app>
-    <v-main class="flex main">
-      <aside class="ai-drawer pa-4">
-        <div
-          class="justify-space-between align-center flex-row flex mb-3 w-100"
-        >
-          <div class="text-h5 logo no-select font-weight-bold">AI Writer</div>
-          <div>
-            <v-menu>
-              <template v-slot:activator="{ props }">
-                <v-btn color="primary" v-bind="props" class="mr-3" size="small">
-                  Identity
-                </v-btn>
-              </template>
-              <v-list density="compact" :selected="[identity]">
-                <v-list-item
-                  v-for="item in Object.keys(IDENTITY)"
-                  :key="item"
-                  :value="item"
-                  @click="onSelectIdentity(item)"
-                >
-                  <v-list-item-title>{{ item }}</v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-menu>
-
-            <v-dialog v-model="dialog" :width="540">
-              <template v-slot:activator="{ props }">
-                <v-icon
-                  icon="mdi-cog-outline"
-                  class="pointer hover-primary"
-                  @click="dialog = true"
-                  v-bind="props"
-                >
-                </v-icon>
-              </template>
-              <v-card>
-                <v-card-title>
-                  <span class="text-h5">Settings</span>
-                </v-card-title>
-                <v-card-text>
-                  <v-form ref="openAISettingForm" lazy-validation class="mt-4">
-                    <v-text-field
-                      label="AI writer key"
-                      v-model="settingForm.apiKey"
-                    >
-                    </v-text-field>
-
-                    <v-text-field
-                      label="Translator key"
-                      v-model="settingForm.authKey"
-                    >
-                    </v-text-field>
-                  </v-form>
-                </v-card-text>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn variant="text" color="primary" @click="onSaveAPIKey">
-                    Save
-                  </v-btn>
-                </v-card-actions>
-              </v-card>
-            </v-dialog>
-          </div>
+  <main class="flex main">
+    <aside class="ai-drawer pa-4">
+      <div class="justify-space-between align-center flex-row flex mb-3 w-100">
+        <div class="text-h5 logo no-select font-weight-bold">AI Writer</div>
+        <div>
+          <v-menu>
+            <template v-slot:activator="{ props }">
+              <v-btn color="primary" v-bind="props" class="mr-3" size="small">
+                Identity
+              </v-btn>
+            </template>
+            <v-list density="compact" :selected="[identity]">
+              <v-list-item
+                v-for="item in Object.keys(IDENTITY)"
+                :key="item"
+                :value="item"
+                @click="onSelectIdentity(item)"
+              >
+                <v-list-item-title>{{ item }}</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
         </div>
-        <p class="text-subtitle-2 font-weight-regular no-select">
-          Write like a pro.
-        </p>
-        <v-form ref="form" lazy-validation class="mt-4">
-          <v-select
-            variant="outlined"
-            v-model="formData.type"
-            :items="TASK_TYPES"
-            :rules="[(v) => !!v || 'Item is required']"
-            color="primary"
-          >
-          </v-select>
+      </div>
+      <p class="text-subtitle-2 font-weight-regular no-select">
+        Write like a pro.
+      </p>
+      <v-form ref="form" lazy-validation class="mt-4">
+        <v-select
+          variant="outlined"
+          v-model="formData.type"
+          :items="TASK_TYPES"
+          :rules="[(v) => !!v || 'Item is required']"
+          color="primary"
+        >
+        </v-select>
 
-          <div v-if="selectedType.theme">
-            <h3 class="mb-3 no-select">
-              {{ selectedType.theme.title }}
-            </h3>
+        <div v-if="selectedType.theme">
+          <h3 class="mb-3 no-select">
+            {{ selectedType.theme.title }}
+          </h3>
 
-            <div class="position-relative">
-              <v-textarea
-                variant="outlined"
-                ref="themeRef"
-                auto-grow
-                v-model="formData.theme"
-                :rows="selectedType.theme.rows || 2"
-                :max-rows="4"
-                :counter="selectedType.theme.maxlength"
-                :counter-value="() => formData.theme.length"
-                :placeholder="selectedType.theme.placeholder"
-                color="primary"
-              >
-                <template v-slot:append-inner>
-                  <v-tooltip text="Copy from the right">
-                    <template v-slot:activator="{ props }">
-                      <v-icon
-                        v-bind="props"
-                        icon="mdi-select"
-                        @click.stop="onSelectForInput(THEME)"
-                        class="hover-primary"
-                      ></v-icon>
-                    </template>
-                  </v-tooltip>
-                </template>
-              </v-textarea>
-              <v-icon
-                v-if="formData.theme.length"
-                icon="mdi-close-circle"
-                @click.stop="onClearInputValue(THEME)"
-                class="clear-icon"
-                :size="20"
-              ></v-icon>
-            </div>
-          </div>
-
-          <div v-if="selectedType.outline">
-            <h3 class="mb-3 no-select">
-              {{ selectedType.outline.title }}
-            </h3>
-
-            <div class="position-relative">
-              <v-textarea
-                variant="outlined"
-                ref="outlineRef"
-                auto-grow
-                v-model="formData.outline"
-                :rows="2"
-                :max-rows="2"
-                :counter="selectedType.outline.maxlength"
-                :counter-value="() => formData.outline.length"
-                :placeholder="selectedType.outline.placeholder"
-                color="primary"
-              >
-                <template v-slot:append-inner>
-                  <v-tooltip text="Copy from the right">
-                    <template v-slot:activator="{ props }">
-                      <v-icon
-                        v-bind="props"
-                        icon="mdi-select"
-                        @click.stop="onSelectForInput(OUTLINE)"
-                        class="hover-primary"
-                      ></v-icon>
-                    </template>
-                  </v-tooltip>
-                </template>
-              </v-textarea>
-              <v-icon
-                v-if="formData.outline.length"
-                icon="mdi-close-circle"
-                @click.stop="onClearInputValue(OUTLINE)"
-                class="clear-icon"
-                :size="20"
-              ></v-icon>
-            </div>
-          </div>
-
-          <div
-            v-if="
-              formData.type === ESSAY_OUTLINE ||
-              formData.type === OUTLINE_TO_PARAGRAPH ||
-              formData.type === KEYWORDS_TO_PARAGRAPH ||
-              formData.type === TONE_REWRITE
-            "
-            class="mb-3 pr-15"
-          >
-            <h3 class="mb-3 no-select">Tone</h3>
-            <div v-for="mood in MOODS" :key="mood" class="mood-wrap">
-              <v-btn
-                class="mb-1 mr-1"
-                :variant="formData.mood === mood ? 'tonal' : 'text'"
-                :color="formData.mood === mood ? 'primary' : ''"
-                size="small"
-                @click="onToggleMood(mood)"
-              >
-                {{ mood }}
-              </v-btn>
-            </div>
-          </div>
-
-          <div
-            v-if="
-              formData.type === CONTENT_REWRITE ||
-              formData.type === LEVEL_REWRITE ||
-              formData.type === STYLE_REWRITE
-            "
-            class="mb-3"
-          >
-            <h3 class="mb-3 no-select">Option</h3>
-            <div
-              v-for="option in selectedType.options"
-              :key="option"
-              class="mood-wrap options"
-            >
-              <v-btn
-                class="mb-1 mr-1 rewrite-option"
-                :variant="formData.option === option ? 'tonal' : 'text'"
-                :color="formData.option === option ? 'primary' : ''"
-                size="small"
-                @click="onSelectOption(option)"
-              >
-                {{ option }}
-              </v-btn>
-            </div>
-          </div>
-
-          <div class="btns">
-            <v-btn
-              :disabled="invalid"
-              :loading="loading"
-              @click="onCreate"
+          <div class="position-relative">
+            <v-textarea
+              variant="outlined"
+              ref="themeRef"
+              auto-grow
+              v-model="formData.theme"
+              :rows="selectedType.theme.rows || 2"
+              :max-rows="4"
+              :counter="selectedType.theme.maxlength"
+              :counter-value="() => formData.theme.length"
+              :placeholder="selectedType.theme.placeholder"
               color="primary"
             >
-              Magic
-            </v-btn>
-            <v-btn @click="onReset" class="ml-2" v-if="isNeedReset">
-              Reset
-            </v-btn>
+              <template v-slot:append-inner>
+                <v-tooltip text="Copy from the right">
+                  <template v-slot:activator="{ props }">
+                    <v-icon
+                      v-bind="props"
+                      icon="mdi-select"
+                      @click.stop="onSelectForInput(THEME)"
+                      class="hover-primary"
+                    ></v-icon>
+                  </template>
+                </v-tooltip>
+              </template>
+            </v-textarea>
+            <v-icon
+              v-if="formData.theme.length"
+              icon="mdi-close-circle"
+              @click.stop="onClearInputValue(THEME)"
+              class="clear-icon"
+              :size="20"
+            ></v-icon>
           </div>
-        </v-form>
-
-        <div class="suggestions mt-5">
-          <div v-if="costTime && loading" class="text-subtitle-2 text-center">
-            It will take about {{ costTime }} seconds.
-            <br />
-            <p v-if="timeCount">{{ timeCount }} seconds passed...</p>
-          </div>
-          <v-card
-            v-for="(suggestion, index) in suggestions"
-            class="pa-4 pb-0 my-4 pointer"
-            :key="suggestion"
-            elevation="2"
-            hover
-            @click="onCopySuggestion(index)"
-          >
-            <p>{{ suggestion }}</p>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="primary" @click.stop="onCopySuggestionOnly(index)"
-                >Copy</v-btn
-              >
-            </v-card-actions>
-          </v-card>
         </div>
-      </aside>
 
-      <div class="flex-1 content flex flex-column">
-        <QuillEditor
-          theme="snow"
-          contentType="text"
-          :options="quillOptions"
-          ref="quill"
-          v-model:content="article"
-          @selectionChange="onArticleSelect"
-          @update:content="onContentChange"
-          class="flex-1 pa-4 pb-0 border-0 overflow-y-auto"
-          id="quill-editor"
-          draggable="false"
-          @textChange="onTextChange"
-        />
-        <!-- <textarea id="article" name="" cols="30" rows="10" v-model="article" placeholder="Your article" class="pa-5"
+        <div v-if="selectedType.outline">
+          <h3 class="mb-3 no-select">
+            {{ selectedType.outline.title }}
+          </h3>
+
+          <div class="position-relative">
+            <v-textarea
+              variant="outlined"
+              ref="outlineRef"
+              auto-grow
+              v-model="formData.outline"
+              :rows="2"
+              :max-rows="2"
+              :counter="selectedType.outline.maxlength"
+              :counter-value="() => formData.outline.length"
+              :placeholder="selectedType.outline.placeholder"
+              color="primary"
+            >
+              <template v-slot:append-inner>
+                <v-tooltip text="Copy from the right">
+                  <template v-slot:activator="{ props }">
+                    <v-icon
+                      v-bind="props"
+                      icon="mdi-select"
+                      @click.stop="onSelectForInput(OUTLINE)"
+                      class="hover-primary"
+                    ></v-icon>
+                  </template>
+                </v-tooltip>
+              </template>
+            </v-textarea>
+            <v-icon
+              v-if="formData.outline.length"
+              icon="mdi-close-circle"
+              @click.stop="onClearInputValue(OUTLINE)"
+              class="clear-icon"
+              :size="20"
+            ></v-icon>
+          </div>
+        </div>
+
+        <div
+          v-if="
+            formData.type === ESSAY_OUTLINE ||
+            formData.type === OUTLINE_TO_PARAGRAPH ||
+            formData.type === KEYWORDS_TO_PARAGRAPH ||
+            formData.type === TONE_REWRITE
+          "
+          class="mb-3 pr-15"
+        >
+          <h3 class="mb-3 no-select">Tone</h3>
+          <div v-for="mood in MOODS" :key="mood" class="mood-wrap">
+            <v-btn
+              class="mb-1 mr-1"
+              :variant="formData.mood === mood ? 'tonal' : 'text'"
+              :color="formData.mood === mood ? 'primary' : ''"
+              size="small"
+              @click="onToggleMood(mood)"
+            >
+              {{ mood }}
+            </v-btn>
+          </div>
+        </div>
+
+        <div
+          v-if="
+            formData.type === CONTENT_REWRITE ||
+            formData.type === LEVEL_REWRITE ||
+            formData.type === STYLE_REWRITE
+          "
+          class="mb-3"
+        >
+          <h3 class="mb-3 no-select">Option</h3>
+          <div
+            v-for="option in selectedType.options"
+            :key="option"
+            class="mood-wrap options"
+          >
+            <v-btn
+              class="mb-1 mr-1 rewrite-option"
+              :variant="formData.option === option ? 'tonal' : 'text'"
+              :color="formData.option === option ? 'primary' : ''"
+              size="small"
+              @click="onSelectOption(option)"
+            >
+              {{ option }}
+            </v-btn>
+          </div>
+        </div>
+
+        <div class="btns">
+          <v-btn
+            :disabled="invalid"
+            :loading="loading"
+            @click="onCreate"
+            color="primary"
+          >
+            Magic
+          </v-btn>
+          <v-btn @click="onReset" class="ml-2" v-if="isNeedReset">
+            Reset
+          </v-btn>
+        </div>
+      </v-form>
+
+      <div class="suggestions mt-5">
+        <div v-if="costTime && loading" class="text-subtitle-2 text-center">
+          It will take about {{ costTime }} seconds.
+          <br />
+          <p v-if="timeCount">{{ timeCount }} seconds passed...</p>
+        </div>
+        <v-card
+          v-for="(suggestion, index) in suggestions"
+          class="pa-4 pb-0 my-4 pointer"
+          :key="suggestion"
+          elevation="2"
+          hover
+          @click="onCopySuggestion(index)"
+        >
+          <p>{{ suggestion }}</p>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="primary" @click.stop="onCopySuggestionOnly(index)"
+              >Copy</v-btn
+            >
+          </v-card-actions>
+        </v-card>
+      </div>
+    </aside>
+
+    <div class="flex-1 content flex flex-column">
+      <QuillEditor
+        theme="snow"
+        contentType="text"
+        :options="quillOptions"
+        ref="quill"
+        v-model:content="article"
+        @selectionChange="onArticleSelect"
+        @update:content="onContentChange"
+        class="flex-1 pa-4 pb-0 border-0 overflow-y-auto"
+        id="quill-editor"
+        draggable="false"
+        @textChange="onTextChange"
+      />
+      <!-- <textarea id="article" name="" cols="30" rows="10" v-model="article" placeholder="Your article" class="pa-5"
           @change="onContentChange" @select="onArticleSelect" @click="onContentClick"
           @keydown="onContentKeyboardEvent"></textarea> -->
 
-        <div
-          class="article-tools d-flex justify-space-between align-center pa-4 bg-white"
-        >
-          <v-btn
-            class="mr-3"
-            variant="tonal"
-            color="primary"
-            @click="onCopyAll"
-          >
-            Copy!
-          </v-btn>
+      <div
+        class="article-tools d-flex justify-space-between align-center pa-4 bg-white"
+      >
+        <v-btn class="mr-3" variant="tonal" color="primary" @click="onCopyAll">
+          Copy!
+        </v-btn>
 
-          <v-spacer></v-spacer>
-          <v-tooltip text="clear all" location="top">
-            <template v-slot:activator="{ props }">
-              <v-btn
-                icon="mdi-delete"
-                size="small"
-                class="mr-3"
-                variant="tonal"
-                @click="onClearArticle"
-                v-bind="props"
-              >
-              </v-btn>
-            </template>
-          </v-tooltip>
+        <v-spacer></v-spacer>
+        <v-tooltip text="clear all" location="top">
+          <template v-slot:activator="{ props }">
+            <v-btn
+              icon="mdi-delete"
+              size="small"
+              class="mr-3"
+              variant="tonal"
+              @click="onClearArticle"
+              v-bind="props"
+            >
+            </v-btn>
+          </template>
+        </v-tooltip>
 
-          <v-tooltip text="back" location="top">
-            <template v-slot:activator="{ props }">
-              <v-btn
-                icon="mdi-arrow-u-left-top"
-                size="small"
-                class="mr-3"
-                variant="tonal"
-                @click="onBack"
-                v-bind="props"
-              >
-              </v-btn>
-            </template>
-          </v-tooltip>
+        <v-tooltip text="back" location="top">
+          <template v-slot:activator="{ props }">
+            <v-btn
+              icon="mdi-arrow-u-left-top"
+              size="small"
+              class="mr-3"
+              variant="tonal"
+              @click="onBack"
+              v-bind="props"
+            >
+            </v-btn>
+          </template>
+        </v-tooltip>
 
-          <v-tooltip text="forward" location="top">
-            <template v-slot:activator="{ props }">
-              <v-btn
-                icon="mdi-arrow-u-right-top"
-                size="small"
-                class="mr-3"
-                variant="tonal"
-                @click="onForward"
-                v-bind="props"
-              >
-              </v-btn>
-            </template>
-          </v-tooltip>
+        <v-tooltip text="forward" location="top">
+          <template v-slot:activator="{ props }">
+            <v-btn
+              icon="mdi-arrow-u-right-top"
+              size="small"
+              class="mr-3"
+              variant="tonal"
+              @click="onForward"
+              v-bind="props"
+            >
+            </v-btn>
+          </template>
+        </v-tooltip>
 
-          <v-chip
-            class="no-select"
-            close-icon="mdi-close-outline"
-            color="primary"
-            size="small"
-            >{{ wordsCount }} words
-          </v-chip>
-        </div>
+        <v-chip
+          class="no-select"
+          close-icon="mdi-close-outline"
+          color="primary"
+          size="small"
+          >{{ wordsCount }} words
+        </v-chip>
       </div>
+    </div>
 
-      <v-snackbar v-model="toast" location="top" :timeout="2000">
-        {{ toastMessage }}
-      </v-snackbar>
-    </v-main>
-  </v-app>
+    <v-snackbar v-model="toast" location="top" :timeout="2000">
+      {{ toastMessage }}
+    </v-snackbar>
+  </main>
 </template>
 
 <script setup>
+import { gptReq } from "@/api/gpt";
 import { QuillEditor } from "@vueup/vue-quill";
-import DeepL from "deepl";
-import { Configuration, OpenAIApi } from "openai";
 import { computed, onMounted, reactive, ref, watch } from "vue";
+import { deeplReq } from "../api/gpt";
 
 const quillOptions = {
   modules: {
@@ -594,7 +547,6 @@ const rewriteConfigs = {
 const TASK_TYPES = TASKS.map((t) => t.type);
 let quill = ref(null); //vue的quillRef，仅有部分api
 let quillInstance = ref(null); //原生的quill对象，包含所有api
-const dialog = ref(false);
 const loading = ref(false);
 const costTime = ref(0); //请求预计花费的时间
 const counter = ref(null); //请求中计时花费了多少秒，每秒更新
@@ -606,9 +558,7 @@ const suggestions = ref([]);
 const selectingForCopy = ref(false);
 const selectingForCopyType = ref(THEME);
 const article = ref("");
-const openAISettingForm = ref(null);
 const mousePosition = ref({ index: 0, length: 0 });
-const openai = ref(null);
 const toast = ref(false);
 const identity = ref("None");
 const toastMessage = ref("");
@@ -684,7 +634,6 @@ onMounted(() => {
   }
   let iden = localStorage.getItem("identity");
   if (iden) identity.value = iden;
-  generateOpenai();
   quillInstance.value = quill.value.getQuill();
 });
 
@@ -707,11 +656,6 @@ function computeWaitTime(type, input) {
 
 function getContent() {
   return quill.value.getText();
-}
-
-function generateOpenai() {
-  const configuration = new Configuration({ apiKey: settingForm.apiKey });
-  openai.value = new OpenAIApi(configuration);
 }
 
 function onReset() {
@@ -758,34 +702,47 @@ function requestAI() {
         ...rewriteConfigs[formData.mood].config,
       };
   }
-  let p = openai.value.createCompletion({
-    model: "text-davinci-003",
-    prompt: selectedType.value?.genPrompt(
-      formData.mood || formData.option,
-      formData.theme
-    ),
-    temperature: 0.1,
-    max_tokens: 600,
-    top_p: 1.0,
-    frequency_penalty: 0.0,
-    presence_penalty: 0.0,
-    n: 2,
-    ...extraConfig,
+
+  let p = gptReq({
+    method: "content_rewrite",
+    userInput: formData.theme,
+    tone: formData.mood,
+    levelOption: formData.type === LEVEL_REWRITE ? formData.option : "",
+    contentOption: formData.type !== LEVEL_REWRITE ? formData.option : "",
   });
+
   p.catch((err) => {
     toastMessage.value = err.message;
     toast.value = true;
   });
+
+  // let p = openai.value.createCompletion({
+  //   model: "text-davinci-003",
+  //   prompt: selectedType.value?.genPrompt(
+  //     formData.mood || formData.option,
+  //     formData.theme
+  //   ),
+  //   temperature: 0.1,
+  //   max_tokens: 600,
+  //   top_p: 1.0,
+  //   frequency_penalty: 0.0,
+  //   presence_penalty: 0.0,
+  //   n: 2,
+  //   ...extraConfig,
+  // });
+  // p.catch((err) => {
+  //   toastMessage.value = err.message;
+  //   toast.value = true;
+  // });
   return p;
 }
 
 function requestTranslate() {
-  let p = DeepL({
-    free_api: true,
+  let p = deeplReq({
     text: formData.theme,
-    target_lang: "EN",
-    source_lang: "ZH",
-    auth_key: settingForm.authKey,
+    source: "ZH",
+    target: "EN",
+    autoDetect: false,
   });
   p.catch((err) => {
     toastMessage.value = err.message;
@@ -802,24 +759,24 @@ function onCreate() {
   timeCount.value = 0;
   let t = computeWaitTime(formData.type, formData.theme);
   if (formData.type === DEEPL) {
-    if (!settingForm.authKey) {
-      dialog.value = true;
-      return;
-    }
+    // if (!settingForm.authKey) {
+    //   dialog.value = true;
+    //   return;
+    // }
     loading.value = true;
     costTime.value = t;
     requestTranslate()
       .then((res) => {
-        suggestions.value = res.data.translations.map((c) => c.text.trim());
+        suggestions.value = [res.data?.text];
       })
       .finally(() => {
         loading.value = false;
       });
   } else {
-    if (!settingForm.apiKey) {
-      dialog.value = true;
-      return;
-    }
+    // if (!settingForm.apiKey) {
+    //   dialog.value = true;
+    //   return;
+    // }
     loading.value = true;
     costTime.value = t;
     counter.value = setInterval(() => {
@@ -827,7 +784,7 @@ function onCreate() {
     }, 1000);
     requestAI()
       .then((res) => {
-        suggestions.value = res.data.choices.map((c) => c.text.trim());
+        suggestions.value = res?.data.choices.map((c) => c.trim());
       })
       .finally(() => {
         loading.value = false;
@@ -928,24 +885,6 @@ function onArticleSelect(param) {
   selectingForCopy.value = false;
 }
 
-/**
- * 用户填写apiKey后保存到本地
- */
-function onSaveAPIKey() {
-  openAISettingForm.value.validate().then((res) => {
-    if (res.valid) {
-      dialog.value = false;
-      localStorage.setItem("authKey", settingForm.authKey || "");
-      localStorage.setItem("apiKey", settingForm.apiKey || "");
-      let hash = "#";
-      if (settingForm.apiKey) hash += "k1=" + settingForm.apiKey;
-      if (settingForm.authKey) hash += "&k2=" + settingForm.authKey;
-      if (hash !== "#") location.hash = hash;
-      generateOpenai();
-    }
-  });
-}
-
 function onClearInputValue(type) {
   formData[type] = "";
 }
@@ -980,7 +919,7 @@ html {
 }
 
 .main {
-  height: calc(100vh - 64px);
+  height: calc(100vh - 67px);
   overflow: hidden;
 }
 

@@ -1,12 +1,17 @@
 import axios from "axios";
 
-export const baseURL = "/api";
+const isDev = import.meta.env.DEV;
+
+export const baseURL = isDev ? "/api" : "http://localhost:8888";
 
 const instance = axios.create({
   baseURL,
-  timeout: 1000,
+  timeout: 60 * 1000,
   headers: { "X-Custom-Header": "foobar" },
 });
+
+const token = localStorage.getItem("token");
+if (token) instance.defaults.headers.common.authorization = token;
 
 export interface IData {
   code: number;
@@ -22,14 +27,22 @@ instance.interceptors.response.use((res) => {
   } else if (res.status === 400) {
     alert("code has bug");
   } else if (res.status >= 200 && res.status < 300) {
-    const { data, code, message } = res.data as IData;
-    if (code !== 0) {
-      alert(message);
-      throw data; // code不为0时reject数据，在useAsyncState的onError中处理后续逻辑
+    const token = res.data?.accessToken;
+    if (token) {
+      localStorage.setItem("token", token);
+      instance.defaults.headers.common["authorization"] = token;
     }
-    return data; // code为0时resolve数据，在useAsyncState的onSuccess中处理后续逻辑
+    if (res.data?.username) {
+      localStorage.setItem("username", res.data.username);
+    }
+    // const { data, code, message } = res.data as IData;
+    // if (code !== 0) {
+    //   alert(message);
+    //   throw data; // code不为0时reject数据，在useAsyncState的onError中处理后续逻辑
+    // }
+    // return data; // code为0时resolve数据，在useAsyncState的onSuccess中处理后续逻辑
   }
-  return;
+  return res;
 });
 
 export default instance;

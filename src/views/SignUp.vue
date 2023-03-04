@@ -1,5 +1,5 @@
 <template>
-  <main class="flex-center page pa-2 pt-16">
+  <main class="flex-center page">
     <v-card title="Sign up" :width="500">
       <div class="pt-4 px-7 pb-8">
         <v-form validate-on="submit" @submit.prevent="onSubmit">
@@ -52,13 +52,13 @@
           </v-btn>
         </v-form>
 
-        <div class="other-way">
+        <!-- <div class="other-way">
           <div class="way mt-4" @click="onGoogleSignUp">
             <img src="@/assets/google.svg" alt="Google" />
             <span>Sign up with Google</span>
             <v-icon icon="mdi-chevron-right"> </v-icon>
           </div>
-        </div>
+        </div> -->
       </div>
     </v-card>
   </main>
@@ -88,13 +88,14 @@ const { isLoading, execute: signUp } = useAsyncState(
   {
     immediate: false,
     onSuccess() {
-      router.push("/ai-writer");
+      router.push("/signin");
     },
   }
 );
 
 const onSubmit = async (event: SubmitEventPromise) => {
   const results = await event;
+  signUp();
   console.log(results, "results");
 };
 
@@ -124,8 +125,8 @@ const onGoogleSignUp = () => {
   })
     .then((response) => {
       console.log("Handle the response", response);
-      const userData = decodeCredential(response.credential);
-      console.log("Handle the userData", userData);
+      // const userData = decodeCredential(response.credential);
+      // console.log("Handle the userData", userData);
     })
     .catch((err) => {
       console.log(err, 1);
@@ -141,6 +142,8 @@ const onGotoSignIn = () => {
 main {
   display: flex;
   justify-content: center;
+  flex: 1;
+  min-height: 600px;
 }
 
 .way {

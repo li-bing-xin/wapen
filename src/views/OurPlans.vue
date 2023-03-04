@@ -9,7 +9,19 @@
       <div class="basic plan" v-for="plan in plans" :key="plan.name">
         <h2>{{ plan.name }}</h2>
         <p>{{ plan.desc }}</p>
-        <v-btn class="mb-2 mt-6" size="large" block color="primary">
+
+        <div class="price mt-10">
+          <div>Starting at</div>
+          <div class="bold font-10">${{ plan.money.toFixed(2) }} USD</div>
+          <div>/ month</div>
+        </div>
+        <v-btn
+          class="mb-5 mt-6"
+          size="large"
+          block
+          color="primary"
+          @click="$router.push('/payment')"
+        >
           Get Started
         </v-btn>
         <ul class="features">
@@ -50,6 +62,18 @@
         </ul>
       </div>
     </div>
+
+    <div class="mv-20">
+      <h2 class="mb-8">Frequently Asked Questions</h2>
+      <v-expansion-panels>
+        <v-expansion-panel
+          v-for="item in list"
+          :key="item.question"
+          :title="item.question"
+          :text="item.answer"
+        ></v-expansion-panel>
+      </v-expansion-panels>
+    </div>
   </div>
 </template>
 
@@ -63,6 +87,7 @@ const plans = [
   {
     name: BASIC,
     desc: "Basic writing suggestions and tone detection",
+    money: 12,
     features: [
       {
         name: "Grammar",
@@ -85,11 +110,26 @@ const plans = [
           text: "Fix punctuation errors.",
         },
       },
+      {
+        name: "Conciseness",
+        desc: {
+          imgUrl: null,
+          text: "Fix punctuation errors.",
+        },
+      },
+      {
+        name: "Tone detection",
+        desc: {
+          imgUrl: null,
+          text: "Fix punctuation errors.",
+        },
+      },
     ],
   },
   {
     name: Premium,
     desc: "Clarity, vocabulary, and tone improvements",
+    money: 20,
     features: [
       {
         name: "Everything in Free",
@@ -105,7 +145,56 @@ const plans = [
           text: "Fix spelling errors.",
         },
       },
+      {
+        name: "Full-sentence rewrites",
+        desc: {
+          imgUrl: null,
+          text: "Fix spelling errors.",
+        },
+      },
+      {
+        name: "Tone suggestions",
+        desc: {
+          imgUrl: null,
+          text: "Fix spelling errors.",
+        },
+      },
+      {
+        name: "Citations",
+        desc: {
+          imgUrl: null,
+          text: "Fix spelling errors.",
+        },
+      },
     ],
+  },
+];
+
+const list = [
+  {
+    question:
+      "What’s the difference between Grammarly Premium and Grammarly Business?",
+    answer:
+      "Grammarly Premium is built for individuals, while Grammarly Business is built for teams. With Grammarly Premium, individuals can up-level their communication at work, school, or elsewhere. With Grammarly Business, enterprises, organizations, and teams can access additional features for consistent communication and additional security.",
+  },
+  {
+    question: "How secure is Grammarly?",
+    answer:
+      "Grammarly keeps security at the heart of our product, infrastructure, and company operations. Learn more about our security practices. Grammarly’s SOC 2 (Type 2) report attests to our enterprise-grade system and organization controls regarding security, privacy, availability, and confidentiality.",
+  },
+  {
+    question: "Do you have any volume discounts?",
+    answer:
+      "Yes! We offer volume discounts on annual plans for 10 or more members. The discount is automatically applied if you use our self-checkout process. Contact sales if you’re buying a plan for 150 or more members.",
+  },
+  {
+    question: "What forms of payment do you accept?",
+    answer:
+      "We accept major credit cards (Visa, American Express, Mastercard, Discover) or PayPal. If you are purchasing Grammarly Business for 10 or more members on an annual plan, you can request an invoice. Invoices can be paid by bank transfer (ACH/Wire), major credit cards, Apple Pay, and Google Pay. Note: PayPal cannot be used to pay invoices.",
+  },
+  {
+    question: "Do you offer discounts for educational institutions?",
+    answer: "Yes! Learn more about our discounts for educational institutions.",
   },
 ];
 
@@ -114,7 +203,7 @@ const currentPlan = ref(BASIC);
 
 <style lang="scss" scoped>
 .page {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 5vh auto;
 
   h1 {

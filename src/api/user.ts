@@ -1,12 +1,16 @@
-import inst, { type IData } from "./axios";
+import inst from "./axios";
 
 export interface ISignUpReq {
   email: string;
   password: string;
+  username?: string;
 }
 
-export const signUpReq = (data: ISignUpReq): Promise<IData> =>
-  inst.post("/user/signup", data);
+export interface ISignIReq {
+  email: string;
+  password: string;
+}
 
-export const signInReq = (data: ISignUpReq): Promise<IData> =>
-  inst.post("/user/signin", data);
+export const signUpReq = (data: ISignUpReq) => inst.post("/user/signup", data);
+
+export const signInReq = (data: ISignIReq) => inst.post("/user/signin", data);

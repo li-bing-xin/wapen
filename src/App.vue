@@ -1,26 +1,36 @@
-<script setup>
+<script setup lang="ts">
 import { RouterView, useRoute } from "vue-router";
 import AppHeader from "./components/AppHeader.vue";
-import { ref } from "vue";
+import { useToast } from "./stores/toast";
 
-const whiteList = ["/about", "/plans", "/qa"];
+const whiteList = ["/about", "/plans", "/qa", "/", "/signin", "/signup"];
 
 const route = useRoute();
 
-const s = ref(true);
-const msg = ref("12312");
+const toastStore = useToast();
 </script>
 
 <template>
   <div id="container">
-    <AppHeader v-if="whiteList.find((c) => c === route.path)" />
+    <AppHeader />
     <RouterView />
 
-    <v-snackbar v-model="s" location="top" color="primary">
-      {{ msg }}
+    <v-snackbar
+      v-model="toastStore.visible"
+      location="top"
+      color="primary"
+      :timeout="1000"
+    >
+      {{ toastStore.msg }}
 
       <template v-slot:actions>
-        <v-btn color="black" variant="text" @click="s = false"> Close </v-btn>
+        <v-btn
+          color="black"
+          variant="text"
+          @click="() => toastStore.setVisible(false)"
+        >
+          Close
+        </v-btn>
       </template>
     </v-snackbar>
   </div>
