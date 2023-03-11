@@ -7,7 +7,6 @@ export const baseURL = !isDev ? "http://47.88.13.166:8888" : "/api";
 const instance = axios.create({
   baseURL,
   timeout: 60 * 1000,
-  headers: { "X-Custom-Header": "foobar" },
 });
 
 const token = localStorage.getItem("token");
