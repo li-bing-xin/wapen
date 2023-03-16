@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+    wapen-web:
+        container_name: wapen-web
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - '9002:8080'

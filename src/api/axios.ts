@@ -2,7 +2,7 @@ import axios from "axios";
 
 const isDev = import.meta.env.DEV;
 
-export const baseURL = !isDev ? "http://47.88.13.166:8888" : "/api";
+export const baseURL = !isDev ? "https://api-dev.wapen.ai" : "/api";
 
 const instance = axios.create({
     baseURL,
