@@ -1,5 +1,9 @@
 version: '3'
 
+networks:
+    gateway:
+        external: true
+
 services:
     wapen-web:
         container_name: wapen-web
@@ -8,3 +12,17 @@ services:
             dockerfile: Dockerfile
         ports:
             - '9002:8080'
+        environment:
+            - TZ=Asia/Shanghai
+        labels:
+            - traefik.enable=true
+            - traefik.http.routers.wapen-web.rule=Host(`dev.wapen.ai`)
+            # - traefik.http.services.wapen-api.loadbalancer.server.port=9002
+            - traefik.http.routers.wapen-web.tls=true
+            - traefik.http.routers.wapen-web.tls.certresolver=letsencrypt
+        privileged: true
+        stdin_open: true
+        tty: true
+        networks:
+            - gateway
+        restart: always
