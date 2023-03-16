@@ -16,23 +16,23 @@ import * as directives from "vuetify/directives";
 
 // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
 export default createVuetify({
-  components,
-  directives,
-  theme: {
-    themes: {
-      light: {
-        colors: {
-          primary: "#7bb5a3",
-          secondary: "#5CBBF6",
+    components,
+    directives,
+    theme: {
+        themes: {
+            light: {
+                colors: {
+                    primary: "#7bb5a3",
+                    secondary: "#5CBBF6",
+                },
+            },
         },
-      },
     },
-  },
-  icons: {
-    defaultSet: "mdi",
-    aliases,
-    sets: {
-      mdi,
+    icons: {
+        defaultSet: "mdi",
+        aliases,
+        sets: {
+            mdi,
+        },
     },
-  },
 });

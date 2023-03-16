@@ -1,18 +1,31 @@
-import inst, { type IData } from "./axios";
+import inst from "./axios";
+
+export interface IUserInput {
+    field: "topic" | "keywords" | "outline" | "text";
+    value: string;
+}
 
 export interface IGptReq {
-  method: string;
-  userInput: string;
-  tone?: string;
-  contentOption?: string;
-  levelOption?: string;
+    method:
+        | "outline"
+        | "keyword"
+        | "tone_rewrite"
+        | "content_rewrite"
+        | "level_rewrite"
+        | "style_rewrite";
+    userInputs: IUserInput[];
+    tone?: string;
+    contentOption?: string;
+    levelOption?: string;
+    identity: string;
+    option?: string;
 }
 
 export interface IDeepLReq {
-  text: string;
-  source: string;
-  target: string;
-  autoDetect?: boolean;
+    text: string;
+    source: string;
+    target: string;
+    autoDetect?: boolean;
 }
 
 export const gptReq = (data: IGptReq) => inst.post("/gpt", data);

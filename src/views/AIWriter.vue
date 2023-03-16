@@ -36,9 +36,9 @@
         >
         </v-select>
 
-        <div v-if="selectedType.theme">
+        <div v-if="selectedType?.theme">
           <h3 class="mb-3 no-select">
-            {{ selectedType.theme.title }}
+            {{ selectedType?.theme.title }}
           </h3>
 
           <div class="position-relative">
@@ -47,11 +47,11 @@
               ref="themeRef"
               auto-grow
               v-model="formData.theme"
-              :rows="selectedType.theme.rows || 2"
+              :rows="selectedType?.theme.rows || 2"
               :max-rows="4"
-              :counter="selectedType.theme.maxlength"
+              :counter="selectedType?.theme.maxlength"
               :counter-value="() => formData.theme.length"
-              :placeholder="selectedType.theme.placeholder"
+              :placeholder="selectedType?.theme.placeholder"
               color="primary"
             >
               <template v-slot:append-inner>
@@ -77,9 +77,9 @@
           </div>
         </div>
 
-        <div v-if="selectedType.outline">
+        <div v-if="selectedType?.outline">
           <h3 class="mb-3 no-select">
-            {{ selectedType.outline.title }}
+            {{ selectedType?.outline.title }}
           </h3>
 
           <div class="position-relative">
@@ -90,9 +90,9 @@
               v-model="formData.outline"
               :rows="2"
               :max-rows="2"
-              :counter="selectedType.outline.maxlength"
+              :counter="selectedType?.outline.maxlength"
               :counter-value="() => formData.outline.length"
-              :placeholder="selectedType.outline.placeholder"
+              :placeholder="selectedType?.outline.placeholder"
               color="primary"
             >
               <template v-slot:append-inner>
@@ -151,7 +151,7 @@
         >
           <h3 class="mb-3 no-select">Option</h3>
           <div
-            v-for="option in selectedType.options"
+            v-for="option in selectedType?.options"
             :key="option"
             class="mood-wrap options"
           >
@@ -291,8 +291,8 @@
   </main>
 </template>
 
-<script setup>
-import { gptReq } from "@/api/gpt";
+<script setup lang="ts">
+import { gptReq, type IUserInput } from "@/api/gpt";
 import { QuillEditor } from "@vueup/vue-quill";
 import { computed, onMounted, reactive, ref, watch } from "vue";
 import { deeplReq } from "../api/gpt";
@@ -545,16 +545,16 @@ const rewriteConfigs = {
 };
 
 const TASK_TYPES = TASKS.map((t) => t.type);
-let quill = ref(null); //vue的quillRef，仅有部分api
-let quillInstance = ref(null); //原生的quill对象，包含所有api
+let quill = ref<any>(null); //vue的quillRef，仅有部分api
+let quillInstance = ref<any>(null); //原生的quill对象，包含所有api
 const loading = ref(false);
 const costTime = ref(0); //请求预计花费的时间
-const counter = ref(null); //请求中计时花费了多少秒，每秒更新
+const counter = ref<number | undefined>(); //请求中计时花费了多少秒，每秒更新
 const timeCount = ref(0);
 const form = ref(null);
-const themeRef = ref(null);
-const outlineRef = ref(null);
-const suggestions = ref([]);
+const themeRef = ref<HTMLInputElement>();
+const outlineRef = ref<HTMLInputElement>();
+const suggestions = ref<string[]>([]);
 const selectingForCopy = ref(false);
 const selectingForCopyType = ref(THEME);
 const article = ref("");
@@ -581,8 +581,8 @@ const selectedType = computed(() =>
   TASKS.find((t) => t.type === formData.type)
 );
 const invalid = computed(() => {
-  if (selectedType.value.theme && !formData.theme.trim()) return true;
-  if (selectedType.value.outline && !formData.outline.trim()) return true;
+  if (selectedType.value?.theme && !formData.theme.trim()) return true;
+  if (selectedType.value?.outline && !formData.outline.trim()) return true;
   return false;
 });
 const isNeedReset = computed(() => formData.theme || formData.outline);
@@ -592,7 +592,7 @@ watch(
   (n) => {
     onReset();
     if (n === CONTENT_REWRITE || n === LEVEL_REWRITE || n === STYLE_REWRITE) {
-      formData.option = TASKS.find((t) => t.type === n).options[0];
+      formData.option = TASKS.find((t) => t.type === n)!.options![0];
     }
   }
 );
@@ -634,7 +634,7 @@ onMounted(() => {
   }
   let iden = localStorage.getItem("identity");
   if (iden) identity.value = iden;
-  quillInstance.value = quill.value.getQuill();
+  quillInstance.value = quill.value?.getQuill();
 });
 
 /** 估算请求需要花费的时间，单位：秒 */
@@ -649,13 +649,13 @@ function computeWaitTime(type, input) {
     type === STYLE_REWRITE ||
     type === LEVEL_REWRITE
   )
-    return Math.max(parseInt(len / 15), 2);
+    return Math.max(Math.floor(len / 15), 2);
   else if (type === DEEPL) return 0;
   else return 12;
 }
 
 function getContent() {
-  return quill.value.getText();
+  return quill.value?.getText();
 }
 
 function onReset() {
@@ -687,28 +687,84 @@ function onSelectOption(option) {
  * 除了deepl的，都走这个请求
  */
 function requestAI() {
-  let extraConfig;
-  if (selectedType.value.type === TONE_REWRITE) {
-    extraConfig = {
-      temperature: 1.2,
-      max_tokens: 600,
-      top_p: 1,
-      frequency_penalty: 0.9,
-      presence_penalty: 0.9,
-    };
-    if (formData.mood)
-      extraConfig = {
-        ...extraConfig,
-        ...rewriteConfigs[formData.mood].config,
-      };
+  //   let extraConfig;
+  //   if (selectedType.value?.type === TONE_REWRITE) {
+  //     extraConfig = {
+  //       temperature: 1.2,
+  //       max_tokens: 600,
+  //       top_p: 1,
+  //       frequency_penalty: 0.9,
+  //       presence_penalty: 0.9,
+  //     };
+  //     if (formData.mood)
+  //       extraConfig = {
+  //         ...extraConfig,
+  //         ...rewriteConfigs[formData.mood].config,
+  //       };
+  //   }
+
+  const userInputs: IUserInput[] = [];
+
+  switch (formData.type) {
+    case OUTLINE_TO_PARAGRAPH: {
+      userInputs.push(
+        {
+          field: "topic",
+          value: formData.theme,
+        },
+        {
+          field: "outline",
+          value: formData.outline,
+        }
+      );
+      break;
+    }
+    case KEYWORDS_TO_PARAGRAPH: {
+      userInputs.push({
+        field: "keywords",
+        value: formData.theme,
+      });
+      break;
+    }
+    default: {
+      userInputs.push({
+        field: "text",
+        value: formData.theme,
+      });
+    }
+  }
+
+  let method;
+  switch (formData.type) {
+    case OUTLINE_TO_PARAGRAPH:
+    case ESSAY_OUTLINE:
+      method = "outline";
+      break;
+    case KEYWORDS_TO_PARAGRAPH:
+      method = "keyword";
+      break;
+    case CONTENT_REWRITE:
+      method = "content_rewrite";
+      break;
+    case LEVEL_REWRITE:
+      method = "level_rewrite";
+      break;
+    case STYLE_REWRITE:
+      method = "style_rewrite";
+      break;
+    case TONE_REWRITE:
+      method = "tone_rewrite";
+      break;
   }
 
   let p = gptReq({
-    method: "content_rewrite",
-    userInput: formData.theme,
+    method,
+    userInputs,
     tone: formData.mood,
-    levelOption: formData.type === LEVEL_REWRITE ? formData.option : "",
-    contentOption: formData.type !== LEVEL_REWRITE ? formData.option : "",
+    option: formData.option || "",
+    // levelOption: formData.type === LEVEL_REWRITE ? formData.option : "",
+    // contentOption: formData.type !== LEVEL_REWRITE ? formData.option : "",
+    identity: identity.value,
   });
 
   p.catch((err) => {
@@ -799,7 +855,7 @@ function onCreate() {
  */
 function setText(text) {
   article.value = text;
-  quill.value.setText(text);
+  quill.value?.setText(text);
 }
 
 function onClearArticle() {
@@ -811,7 +867,7 @@ function onClearArticle() {
  */
 function onContentChange() {
   setTimeout(() => {
-    mousePosition.value = quillInstance.value.getSelection();
+    mousePosition.value = quillInstance.value?.getSelection();
   });
 }
 
@@ -842,7 +898,7 @@ function onCopySuggestion(i) {
     let t = article.value.slice(0, index) + value + article.value.slice(index);
     setText(t);
   }
-  quillInstance.value.setSelection(index, value.length);
+  quillInstance.value?.setSelection(index, value.length);
   mousePosition.value.index = index + value.length;
   suggestions.value.splice(i, 1);
 }
@@ -860,7 +916,7 @@ function onCopySuggestionOnly(index) {
  * 复制文章所有内容
  */
 function onCopyAll() {
-  let value = quill.value.getText();
+  let value = quill.value?.getText();
   navigator.clipboard.writeText(value);
 }
 
@@ -898,14 +954,14 @@ function onSelectForInput(type) {
  * 执行后退操作
  */
 function onBack() {
-  quillInstance.value.history.undo();
+  quillInstance.value?.history.undo();
 }
 
 /**
  * 执行前进操作
  */
 function onForward() {
-  quillInstance.value.history.redo();
+  quillInstance.value?.history.redo();
 }
 </script>
 

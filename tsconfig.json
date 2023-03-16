@@ -6,7 +6,9 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "allowJs": true
+    "allowJs": true,
+    "noImplicitAny": false,
+    "lib": ["ES2021", "DOM"],
   },
 
   "references": [
