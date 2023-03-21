@@ -10,14 +10,12 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
-        ports:
-            - '9002:8080'
         environment:
             - TZ=Asia/Shanghai
         labels:
             - traefik.enable=true
-            - traefik.http.routers.wapen-web.rule=Host(`dev.wapen.ai`)
-            # - traefik.http.services.wapen-api.loadbalancer.server.port=9002
+            - traefik.http.routers.wapen-web.rule=Host(`wapenai.cn`)
+            - traefik.http.services.wapen-web.loadbalancer.server.port=8080
             - traefik.http.routers.wapen-web.tls=true
             - traefik.http.routers.wapen-web.tls.certresolver=letsencrypt
         privileged: true
